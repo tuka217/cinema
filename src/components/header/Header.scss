@@ -31,16 +31,11 @@
   height: 170px;
   margin-left: 25px;
   margin-top: -5px;
-
-  img {
-    width: 100%;
-  }
 }
 
 .header-nav {
   grid-area: menu;
   margin-right: 25px;
-  margin-top: 0;
 
   .header-nav-item {
     .header-list-icon {
@@ -109,11 +104,11 @@
 
 .search-input {
   grid-area: search;
-  margin-top: 0;
+  margin-top: 10px;
   width: auto;
   border: 1px solid #9aa9bb;
   padding: 5px;
-  height: 30px;
+  height: 36px;
   border-radius: 5px;
   outline: none;
   color: #9dbfaf;
