@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import './Header.scss';
 import logo from '../../assets/cinema-logo.svg';
@@ -10,33 +11,14 @@ import {
   setResponsePageNumber,
   searchQuery,
   searchResult,
+  clearMovieDetails,
 } from '../../redux/actions/movies';
 
 const HEADER_LIST = [
-  {
-    id: 1,
-    iconClass: 'fas fa-film',
-    name: 'Now Playing',
-    type: 'now_playing',
-  },
-  {
-    id: 2,
-    iconClass: 'fas fa-fire',
-    name: 'Popular',
-    type: 'popular',
-  },
-  {
-    id: 3,
-    iconClass: 'fas fa-star',
-    name: 'Top Rated',
-    type: 'top_rated',
-  },
-  {
-    id: 4,
-    iconClass: 'fas fa-plus-square',
-    name: 'Upcoming',
-    type: 'upcoming',
-  },
+  { id: 1, iconClass: 'fas fa-film', name: 'Now Playing', type: 'now_playing' },
+  { id: 2, iconClass: 'fas fa-fire', name: 'Popular', type: 'popular' },
+  { id: 3, iconClass: 'fas fa-star', name: 'Top Rated', type: 'top_rated' },
+  { id: 4, iconClass: 'fas fa-plus-square', name: 'Upcoming', type: 'upcoming' },
 ];
 
 const Header = (props) => {
@@ -48,40 +30,66 @@ const Header = (props) => {
     setResponsePageNumber,
     searchQuery,
     searchResult,
+    clearMovieDetails,
   } = props;
-  let [navClass, setNavClass] = useState(false);
-  let [menuClass, setMenuClass] = useState(false);
+
+  const [navClass, setNavClass] = useState(false);
+  const [menuClass, setMenuClass] = useState(false);
   const [type, setType] = useState('now_playing');
   const [search, setSearch] = useState('');
+  const [disableSearch, setDisableSearch] = useState(false);
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     getMovies(type, page);
     setResponsePageNumber(page, totalPages);
 
-    // eslint-disable-next-line
-  }, [type]);
+    if (location.pathname !== '/' && location.key) {
+      setDisableSearch(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, disableSearch, location]);
 
-  const setMovieTypeUrl = (type) => {
-    setType(type);
-    setMovieType(type);
+  const setMovieTypeUrl = (t) => {
+    setDisableSearch(false);
+
+    if (location.pathname !== '/') {
+      clearMovieDetails();
+      navigate('/');
+      setType('now_playing');
+      setMovieType('now_playing');
+    } else {
+      setType(t);
+      setMovieType(t);
+    }
   };
 
   const onSearchChange = (e) => {
-    setSearch(e.target.value);
-    searchQuery(e.target.value);
-    searchResult(e.target.value);
+    const value = e.target.value;
+    setSearch(value);
+    searchQuery(value);
+    searchResult(value);
+  };
+
+  const navigateToMainPage = () => {
+    setDisableSearch(false);
+    clearMovieDetails();
+    navigate('/');
   };
 
   const toggleMenu = () => {
-    menuClass = !menuClass;
-    navClass = !navClass;
-    setNavClass(navClass);
-    setMenuClass(menuClass);
-    if (navClass) {
-      document.body.classList.add('header-nav-open');
-    } else {
-      document.body.classList.remove('header-nav-open');
-    }
+    setMenuClass((prev) => {
+      const next = !prev;
+      setNavClass(next);
+      if (next) {
+        document.body.classList.add('header-nav-open');
+      } else {
+        document.body.classList.remove('header-nav-open');
+      }
+      return next;
+    });
   };
 
   return (
@@ -89,19 +97,21 @@ const Header = (props) => {
       <div className="header-nav-wrapper">
         <div className="header-bar"></div>
         <div className="header-navbar">
-          <div className="header-image">
+          <div className="header-image" onClick={navigateToMainPage}>
             <img src={logo} alt="" />
           </div>
+
           <div
-            className={`${menuClass ? 'header-menu-toggle is-active' : 'header-menu-toggle'}`}
+            className={menuClass ? 'header-menu-toggle is-active' : 'header-menu-toggle'}
             id="header-mobile-menu"
-            onClick={() => toggleMenu()}
+            onClick={toggleMenu}
           >
             <span className="bar"></span>
             <span className="bar"></span>
             <span className="bar"></span>
           </div>
-          <ul className={`${navClass ? 'header-nav header-mobile-nav' : 'header-nav'}`}>
+
+          <ul className={navClass ? 'header-nav header-mobile-nav' : 'header-nav'}>
             {HEADER_LIST.map((data) => (
               <li
                 key={data.id}
@@ -116,7 +126,7 @@ const Header = (props) => {
               </li>
             ))}
             <input
-              className="search-input"
+              className={`search-input ${disableSearch ? 'disabled' : ''}`}
               type="text"
               placeholder="Search for a movie"
               value={search}
@@ -134,6 +144,7 @@ Header.propTypes = {
   setMovieType: PropTypes.func,
   searchQuery: PropTypes.func,
   searchResult: PropTypes.func,
+  clearMovieDetails: PropTypes.func,
   setResponsePageNumber: PropTypes.func,
   page: PropTypes.number,
   totalPages: PropTypes.number,
@@ -149,5 +160,6 @@ export default connect(mapStateToProps, {
   setMovieType,
   setResponsePageNumber,
   searchQuery,
+  clearMovieDetails,
   searchResult,
 })(Header);

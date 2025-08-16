@@ -5,6 +5,8 @@ import {
   MOVIE_TYPE,
   SEARCH_QUERY,
   SEARCH_RESULT,
+  MOVIE_DETAILS,
+  CLEAR_MOVIE_DETAILS,
 } from '../types';
 
 const initialState = {
@@ -14,9 +16,11 @@ const initialState = {
   movieType: 'now_playing',
   searchQuery: '',
   searchResult: [],
+  movie: [],
 };
 
-const movieReducer = (state = initialState, action) => {
+// eslint-disable-next-line import/no-anonymous-default-export
+export default (state = initialState, action) => {
   switch (action.type) {
     case MOVIE_LIST:
       return {
@@ -51,9 +55,17 @@ const movieReducer = (state = initialState, action) => {
         ...state,
         searchQuery: action.payload,
       };
+    case MOVIE_DETAILS:
+      return {
+        ...state,
+        movie: action.payload,
+      };
+    case CLEAR_MOVIE_DETAILS:
+      return {
+        ...state,
+        movie: [],
+      };
     default:
       return state;
   }
 };
-
-export default movieReducer;
