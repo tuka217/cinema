@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
@@ -13,7 +13,10 @@ const MainContent = (props) => {
   const { list, movieType, totalPages, page, getMovies, setResponsePageNumber } = props;
   const [currentPage, setCurrentPage] = useState(page);
   const [images, setImages] = useState([]);
-  const randomMovies = list.sort(() => Math.random() - Math.random()).slice(0, 4);
+  const randomMovies = useMemo(
+    () => [...list].sort(() => Math.random() - Math.random()).slice(0, 4),
+    [list],
+  );
 
   const HEADER_TYPE = {
     now_playing: 'Now Playing',
